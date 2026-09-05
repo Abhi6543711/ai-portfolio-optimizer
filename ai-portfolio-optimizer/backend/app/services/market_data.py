@@ -1,15 +1,20 @@
 """
 Market Data Module
-Fetches historical price data for given tickers using Stooq (free, no API key).
+Fetches historical price data for given tickers using Stooq's free CSV export
+endpoint (no API key, no library dependency issues).
 
 Note: Yahoo Finance (via yfinance) blocks requests from most cloud-provider IP
 ranges (Render, AWS, GCP, etc.) at the network level, regardless of headers or
 browser impersonation — a widely reported, unresolved issue. Stooq is a free,
 keyless alternative that works reliably from cloud hosts.
 """
+import io
+import logging
 import pandas as pd
-import pandas_datareader.data as web
+import requests
 from datetime import datetime, timedelta
+
+logger = logging.getLogger("market_data")
 
 PERIOD_TO_DAYS = {
     "1y": 365,
@@ -17,11 +22,41 @@ PERIOD_TO_DAYS = {
     "5y": 1825,
 }
 
+STOOQ_URL = "https://stooq.com/q/d/l/"
+
 
 def _stooq_symbol(ticker: str) -> str:
-    """Stooq expects US tickers with a .US suffix."""
-    ticker = ticker.strip().upper()
-    return ticker if "." in ticker else f"{ticker}.US"
+    """Stooq expects US tickers with a .us suffix, lowercase."""
+    ticker = ticker.strip().lower()
+    return ticker if "." in ticker else f"{ticker}.us"
+
+
+def _fetch_single(ticker: str, start: datetime, end: datetime) -> pd.Series | None:
+    params = {
+        "s": _stooq_symbol(ticker),
+        "d1": start.strftime("%Y%m%d"),
+        "d2": end.strftime("%Y%m%d"),
+        "i": "d",
+    }
+    try:
+        resp = requests.get(STOOQ_URL, params=params, timeout=15)
+        resp.raise_for_status()
+        text = resp.text.strip()
+
+        # Stooq returns a plain "N/D" (no data) body for invalid/unknown symbols
+        if not text or text.startswith("N/D") or "Date" not in text.splitlines()[0]:
+            return None
+
+        df = pd.read_csv(io.StringIO(text))
+        if df.empty or "Close" not in df.columns:
+            return None
+
+        df["Date"] = pd.to_datetime(df["Date"])
+        df = df.set_index("Date").sort_index()
+        return df["Close"]
+    except Exception as e:
+        logger.warning(f"Stooq fetch failed for {ticker}: {e}")
+        return None
 
 
 def fetch_price_data(tickers: list[str], period: str = "2y") -> pd.DataFrame:
@@ -40,15 +75,11 @@ def fetch_price_data(tickers: list[str], period: str = "2y") -> pd.DataFrame:
     failed = []
 
     for ticker in tickers:
-        try:
-            df = web.DataReader(_stooq_symbol(ticker), "stooq", start=start, end=end)
-            if df.empty:
-                failed.append(ticker)
-                continue
-            df = df.sort_index()  # stooq returns newest-first by default
-            series_by_ticker[ticker] = df["Close"]
-        except Exception:
+        series = _fetch_single(ticker, start, end)
+        if series is None or series.empty:
             failed.append(ticker)
+        else:
+            series_by_ticker[ticker] = series
 
     if not series_by_ticker:
         raise ValueError(
@@ -63,7 +94,6 @@ def fetch_price_data(tickers: list[str], period: str = "2y") -> pd.DataFrame:
         raise ValueError("No usable price data after cleaning — try different tickers or a longer period")
 
     if failed:
-        # Non-fatal: proceed with whichever tickers succeeded
         prices.attrs["failed_tickers"] = failed
 
     return prices
