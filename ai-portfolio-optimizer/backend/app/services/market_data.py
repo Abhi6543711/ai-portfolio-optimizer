@@ -14,7 +14,7 @@ import pandas as pd
 
 logger = logging.getLogger("market_data")
 
-TWELVE_DATA_API_KEY = os.getenv("402dbc363853449db5d3ad906da2eb6b")
+TWELVE_DATA_API_KEY = os.getenv("TWELVE_DATA_API_KEY")
 BASE_URL = "https://api.twelvedata.com/time_series"
 
 PERIOD_TO_OUTPUTSIZE = {
