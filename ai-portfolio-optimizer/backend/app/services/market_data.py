@@ -38,13 +38,18 @@ def _fetch_single(ticker: str, start: datetime, end: datetime) -> pd.Series | No
         "d2": end.strftime("%Y%m%d"),
         "i": "d",
     }
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
     try:
-        resp = requests.get(STOOQ_URL, params=params, timeout=15)
+        resp = requests.get(STOOQ_URL, params=params, headers=headers, timeout=15)
         resp.raise_for_status()
         text = resp.text.strip()
 
         # Stooq returns a plain "N/D" (no data) body for invalid/unknown symbols
         if not text or text.startswith("N/D") or "Date" not in text.splitlines()[0]:
+            logger.warning(f"Stooq returned no data for {ticker}: {text[:100]!r}")
             return None
 
         df = pd.read_csv(io.StringIO(text))
@@ -57,7 +62,6 @@ def _fetch_single(ticker: str, start: datetime, end: datetime) -> pd.Series | No
     except Exception as e:
         logger.warning(f"Stooq fetch failed for {ticker}: {e}")
         return None
-
 
 def fetch_price_data(tickers: list[str], period: str = "2y") -> pd.DataFrame:
     """
