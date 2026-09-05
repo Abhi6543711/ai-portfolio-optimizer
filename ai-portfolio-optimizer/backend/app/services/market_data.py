@@ -1,50 +1,70 @@
 """
 Market Data Module
-Fetches historical price data for given tickers using yfinance (free, no API key).
+Fetches historical price data for given tickers using Stooq (free, no API key).
 
-Note: Yahoo Finance blocks/rate-limits plain requests from datacenter IPs
-(common on Render/Heroku/etc). We use curl_cffi to impersonate a real
-browser's TLS fingerprint, which reliably avoids this.
+Note: Yahoo Finance (via yfinance) blocks requests from most cloud-provider IP
+ranges (Render, AWS, GCP, etc.) at the network level, regardless of headers or
+browser impersonation — a widely reported, unresolved issue. Stooq is a free,
+keyless alternative that works reliably from cloud hosts.
 """
-import yfinance as yf
 import pandas as pd
-from curl_cffi import requests as cffi_requests
+import pandas_datareader.data as web
+from datetime import datetime, timedelta
+
+PERIOD_TO_DAYS = {
+    "1y": 365,
+    "2y": 730,
+    "5y": 1825,
+}
 
 
-def _browser_session():
-    return cffi_requests.Session(impersonate="chrome")
+def _stooq_symbol(ticker: str) -> str:
+    """Stooq expects US tickers with a .US suffix."""
+    ticker = ticker.strip().upper()
+    return ticker if "." in ticker else f"{ticker}.US"
 
 
 def fetch_price_data(tickers: list[str], period: str = "2y") -> pd.DataFrame:
     """
-    Fetch adjusted close prices for a list of tickers.
+    Fetch closing prices for a list of tickers from Stooq.
     Returns a DataFrame: rows = dates, columns = tickers.
     """
     if not tickers:
         raise ValueError("No tickers provided")
 
-    session = _browser_session()
-    data = yf.download(
-        tickers, period=period, auto_adjust=True, progress=False, session=session
-    )
+    days = PERIOD_TO_DAYS.get(period, 730)
+    end = datetime.today()
+    start = end - timedelta(days=days)
 
-    if data.empty:
+    series_by_ticker = {}
+    failed = []
+
+    for ticker in tickers:
+        try:
+            df = web.DataReader(_stooq_symbol(ticker), "stooq", start=start, end=end)
+            if df.empty:
+                failed.append(ticker)
+                continue
+            df = df.sort_index()  # stooq returns newest-first by default
+            series_by_ticker[ticker] = df["Close"]
+        except Exception:
+            failed.append(ticker)
+
+    if not series_by_ticker:
         raise ValueError(
-            "No data returned for given tickers. Check ticker symbols are valid "
-            "(e.g. AAPL, MSFT) and try again."
+            f"No data returned for given tickers ({', '.join(tickers)}). "
+            "Check the ticker symbols are valid (e.g. AAPL, MSFT) and try again."
         )
 
-    # yfinance returns multi-index columns when multiple tickers are passed
-    if isinstance(data.columns, pd.MultiIndex):
-        prices = data["Close"]
-    else:
-        prices = data[["Close"]]
-        prices.columns = tickers
-
+    prices = pd.DataFrame(series_by_ticker)
     prices = prices.dropna(how="all").ffill().dropna()
 
     if prices.empty:
         raise ValueError("No usable price data after cleaning — try different tickers or a longer period")
+
+    if failed:
+        # Non-fatal: proceed with whichever tickers succeeded
+        prices.attrs["failed_tickers"] = failed
 
     return prices
 
