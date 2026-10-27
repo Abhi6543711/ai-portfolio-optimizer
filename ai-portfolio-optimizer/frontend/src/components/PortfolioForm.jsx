@@ -23,6 +23,7 @@ export default function PortfolioForm({ onSubmit, loading }) {
   const [count, setCount] = useState(5)
   const [selected, setSelected] = useState(DEFAULTS.slice(0, 5))
   const [period, setPeriod] = useState('2y')
+  const [amount, setAmount] = useState(10000)
 
   function handleCountChange(e) {
     const n = Number(e.target.value)
@@ -44,7 +45,7 @@ export default function PortfolioForm({ onSubmit, loading }) {
 
   function handleSubmit(e) {
     e.preventDefault()
-    onSubmit(selected, period)
+    onSubmit(selected, period, Number(amount))
   }
 
   return (
@@ -65,6 +66,18 @@ export default function PortfolioForm({ onSubmit, loading }) {
           <option value="2y">2 Years</option>
           <option value="5y">5 Years</option>
         </select>
+      </label>
+
+      <label>
+        Investment amount ($)
+        <input
+          type="number"
+          min="100"
+          step="100"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          required
+        />
       </label>
 
       <div className="asset-grid">
