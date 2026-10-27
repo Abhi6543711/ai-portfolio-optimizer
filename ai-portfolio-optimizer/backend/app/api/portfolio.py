@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, field_validator
 
+from app.services.risk_free import get_risk_free_rate
 from app.services.market_data import fetch_price_data, compute_daily_returns
 from app.services.supabase_client import get_supabase
 from app.risk import risk_analysis
@@ -48,6 +49,7 @@ def analyze_portfolio(request: PortfolioRequest):
     predictions = predictor.predict_all(prices)
 
     result = {
+        "risk_free_rate": get_risk_free_rate(),
         "tickers": request.tickers,
         "baseline": {
             "metrics": baseline_metrics,
