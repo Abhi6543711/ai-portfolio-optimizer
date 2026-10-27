@@ -291,3 +291,30 @@ body {
 }
 .alloc-bar div { height: 100%; background: var(--accent); }
 .muted { color: var(--muted); font-size: 0.8rem; }
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.news-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+.news-card h3 { margin: 0 0 8px; }
+.news-card a {
+  display: block;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+.news-card a:hover { color: #818cf8; }
+.news-card a span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-top: 2px;
+}
