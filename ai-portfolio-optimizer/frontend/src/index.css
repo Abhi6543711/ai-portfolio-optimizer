@@ -256,3 +256,38 @@ body {
   font-size: 0.8rem;
   text-align: center;
 }
+.row-actions { white-space: nowrap; }
+.row-actions button {
+  padding: 5px 12px;
+  margin-right: 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.row-actions button.danger { border-color: #ef4444; color: #f87171; }
+.detail-row td { background: #12162a; }
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+.detail-grid h4 { margin: 0 0 10px; }
+.alloc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+}
+.alloc-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.alloc-bar div { height: 100%; background: var(--accent); }
+.muted { color: var(--muted); font-size: 0.8rem; }
