@@ -110,6 +110,9 @@ export default function ResultsDashboard({ results }) {
         <div className={`risk-score risk-${baseline.risk_score.level.toLowerCase()}`}>
           {baseline.risk_score.score}/100 — {baseline.risk_score.level} Risk
         </div>
+        <p className="muted">
+          Sharpe uses a {(results.risk_free_rate * 100).toFixed(2)}% risk-free rate (US 3-month Treasury)
+        </p>
       </section>
 
       <section>
