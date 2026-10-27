@@ -5,8 +5,9 @@ Computes volatility, expected return, Sharpe ratio, max drawdown, and VaR.
 import numpy as np
 import pandas as pd
 
+from app.services.risk_free import get_risk_free_rate
+
 TRADING_DAYS = 252
-RISK_FREE_RATE = 0.03  # annualized, approx free-tier assumption
 
 
 def annualized_return(daily_returns: pd.Series) -> float:
@@ -20,7 +21,7 @@ def annualized_volatility(daily_returns: pd.Series) -> float:
 def sharpe_ratio(exp_return: float, volatility: float) -> float:
     if volatility == 0:
         return 0.0
-    return float((exp_return - RISK_FREE_RATE) / volatility)
+    return float((exp_return - get_risk_free_rate()) / volatility)
 
 
 def max_drawdown(cumulative_returns: pd.Series) -> float:
@@ -30,7 +31,7 @@ def max_drawdown(cumulative_returns: pd.Series) -> float:
 
 
 def value_at_risk(daily_returns: pd.Series, confidence: float = 0.95) -> float:
-    """Historical VaR at given confidence level (returns a negative number = potential loss)."""
+    """Historical VaR at given confidence level (negative number = potential loss)."""
     return float(np.percentile(daily_returns, (1 - confidence) * 100))
 
 
@@ -52,12 +53,9 @@ def portfolio_risk_metrics(portfolio_daily_returns: pd.Series) -> dict:
 
 
 def risk_score(metrics: dict) -> dict:
-    """
-    Simple 0-100 risk score derived from volatility and drawdown.
-    Higher = riskier.
-    """
-    vol_component = min(metrics["volatility"] / 0.5, 1) * 60       # cap at 50% annual vol
-    dd_component = min(abs(metrics["max_drawdown"]) / 0.5, 1) * 40  # cap at 50% drawdown
+    """Simple 0-100 risk score from volatility and drawdown. Higher = riskier."""
+    vol_component = min(metrics["volatility"] / 0.5, 1) * 60
+    dd_component = min(abs(metrics["max_drawdown"]) / 0.5, 1) * 40
     score = round(vol_component + dd_component)
 
     if score < 34:
