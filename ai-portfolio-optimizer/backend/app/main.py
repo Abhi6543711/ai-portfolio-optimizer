@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.portfolio import router as portfolio_router
+from app.api.news import router as news_router
 
 app = FastAPI(
     title="AI Portfolio Optimization API",
@@ -19,6 +20,7 @@ app.add_middleware(
 )
 
 app.include_router(portfolio_router)
+app.include_router(news_router)
 
 
 @app.get("/")
