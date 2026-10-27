@@ -49,6 +49,7 @@ def analyze_portfolio(request: PortfolioRequest):
     predictions = predictor.predict_all(prices)
 
     result = {
+        "latest_prices": {t: round(float(prices[t].iloc[-1]), 2) for t in prices.columns},
         "risk_free_rate": get_risk_free_rate(),
         "tickers": request.tickers,
         "baseline": {
