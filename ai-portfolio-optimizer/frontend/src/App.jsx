@@ -58,7 +58,7 @@ export default function App() {
           <PortfolioForm onSubmit={handleSubmit} loading={loading} />
           {error && <div className="error-banner">{error}</div>}
           {results && <ResultsDashboard results={results} />}
-          <History userId={session.user.id} />
+          <History userId={session.user.id} refreshKey={results?.saved_portfolio_id} />
         </>
       )}
 
