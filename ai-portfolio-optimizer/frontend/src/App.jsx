@@ -5,6 +5,7 @@ import Login from './components/Login.jsx'
 import History from './components/History.jsx'
 import { analyzePortfolio } from './services/api.js'
 import { supabase } from './services/supabaseClient.js'
+import NewsPanel from './components/NewsPanel.jsx'
 
 export default function App() {
   const [session, setSession] = useState(null)
@@ -58,6 +59,7 @@ export default function App() {
           <PortfolioForm onSubmit={handleSubmit} loading={loading} />
           {error && <div className="error-banner">{error}</div>}
           {results && <ResultsDashboard results={results} />}
+          {results && <NewsPanel tickers={results.tickers} />}
           <History userId={session.user.id} refreshKey={results?.saved_portfolio_id} />
         </>
       )}
