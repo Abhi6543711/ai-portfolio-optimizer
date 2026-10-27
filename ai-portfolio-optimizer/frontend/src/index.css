@@ -318,3 +318,74 @@ body {
   font-size: 0.72rem;
   margin-top: 2px;
 }
+.tabs { display: flex; gap: 8px; margin: 18px 0; flex-wrap: wrap; }
+.tabs button {
+  padding: 9px 18px; border-radius: 8px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); cursor: pointer; font-weight: 600;
+}
+.tabs button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tabs.small { margin: 8px 0; }
+.tabs.small button { padding: 5px 12px; font-size: 0.8rem; }
+
+.data-table {
+  width: 100%; border-collapse: collapse; background: var(--card);
+  border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 10px;
+}
+.data-table th, .data-table td {
+  padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem;
+}
+.data-table tr.divider td { background: #12162a; color: var(--muted); font-weight: 600; }
+
+.save-bar {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px; margin: 24px 0;
+}
+.save-bar input {
+  flex: 1; min-width: 180px; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--border); background: #0f1220; color: var(--text);
+}
+.save-bar button {
+  padding: 10px 18px; border-radius: 8px; border: none;
+  background: var(--accent); color: #fff; font-weight: 600; cursor: pointer;
+}
+.save-bar button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.save-bar button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.saved-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;
+}
+.saved-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+.saved-head h3 { margin: 0 0 4px; }
+.saved-head p { margin: 0; }
+
+.compare-controls { display: flex; gap: 20px; align-items: end; flex-wrap: wrap; }
+.compare-controls label { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--muted); }
+.compare-controls select {
+  padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: #0f1220; color: var(--text);
+}
+.compare-picks { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 20px; }
+.pick {
+  display: flex; gap: 8px; align-items: center; padding: 8px 14px; border-radius: 8px;
+  border: 1px solid var(--border); cursor: pointer; font-size: 0.85rem;
+}
+.pick.on { border-color: var(--accent); background: #1c2040; }
+
+.profile-box {
+  max-width: 460px; background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 22px; display: flex; flex-direction: column; gap: 16px;
+}
+.profile-box h2 { margin: 0; }
+.profile-box label { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--muted); }
+.profile-box input {
+  padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: #0f1220; color: var(--text); flex: 1;
+}
+.inline-row { display: flex; gap: 8px; }
+.inline-row button {
+  padding: 0 16px; border-radius: 8px; border: none; background: var(--accent); color: #fff; cursor: pointer;
+}
+.profile-stats { display: flex; gap: 32px; }
+.profile-stats div { display: flex; flex-direction: column; }
